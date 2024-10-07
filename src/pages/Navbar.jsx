@@ -1,10 +1,15 @@
-// components/Navbar.jsx
-import React from 'react';
-import { Link } from 'react-router-dom';
+import React, { useContext } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
+import { AuthContext } from '../contexts/AuthContext.jsx';
 
 const Navbar = () => {
-    // Pour l'instant, utilisez une variable booléenne pour simuler la connexion
-    const isLoggedIn = false; // Vous remplacerez ceci par votre logique d'authentification
+    const { isLoggedIn, logout } = useContext(AuthContext);
+    const navigate = useNavigate();
+
+    const handleLogout = () => {
+        logout();
+        navigate('/auth/login');
+    };
 
     return (
         <nav className="bg-gray-800 p-4">
@@ -13,18 +18,20 @@ const Navbar = () => {
                 <div>
                     {isLoggedIn ? (
                         <>
-                            <button className="text-white px-4">Déconnexion</button>
+                            <button onClick={handleLogout} className="text-white px-4">
+                                Déconnexion
+                            </button>
                         </>
                     ) : (
                         <>
-                            <Link to="/login" className="text-white px-4">Connexion</Link>
-                            <Link to="/register" className="text-white px-4">Inscription</Link>
+                            <Link to="/auth/login" className="text-white px-4">Connexion</Link>
+                            <Link to="/auth/register" className="text-white px-4">Inscription</Link>
                         </>
                     )}
                 </div>
             </div>
         </nav>
     );
-}
+};
 
 export default Navbar;

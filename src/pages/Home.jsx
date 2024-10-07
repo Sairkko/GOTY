@@ -1,14 +1,32 @@
-import React, { useContext } from 'react';
+import React, { useContext, useEffect } from 'react';
+import { useLocation, useNavigate } from 'react-router-dom';
+import { toast, ToastContainer } from 'react-toastify';
 import { AuthContext } from '../contexts/AuthContext.jsx';
+import 'react-toastify/dist/ReactToastify.css';
 
 const Home = () => {
     const { isLoggedIn, user } = useContext(AuthContext);
+    const location = useLocation();
+    const navigate = useNavigate();
+
+    useEffect(() => {
+        if (location.state?.fromLogin) {
+            toast.success('Connexion réussie !', {
+                autoClose: 3000,
+            });
+
+            navigate('/', { replace: true, state: {} });
+        }
+    }, [location, navigate]);
 
     return (
         <div className="container mx-auto py-12 px-6">
+            <ToastContainer />
+
             <h1 className="text-4xl font-extrabold text-center text-gray-900 mb-8">
                 Bienvenue sur le jeu !
             </h1>
+
             {isLoggedIn && user ? (
                 <div className="max-w-2xl mx-auto bg-white rounded-lg shadow-md p-8">
                     <p className="text-xl font-semibold text-gray-700 mb-4">
