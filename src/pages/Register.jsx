@@ -45,7 +45,9 @@ const Register = () => {
 
     return (
         <div className="bg-white dark:bg-gray-900 transition-all">
-            <ToastContainer />
+            <ToastContainer
+                theme={darkMode ? "dark" : "light"}
+            />
             <div className="flex justify-center p-4">
                 <button
                     onClick={toggleDarkMode}
