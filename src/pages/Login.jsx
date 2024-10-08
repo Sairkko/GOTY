@@ -1,23 +1,29 @@
 import React, { useContext, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { AuthContext } from '../contexts/AuthContext.jsx';
 import { DarkModeContext } from '../contexts/DarkModeContext.jsx';
 import { Formik, Form, Field, ErrorMessage } from 'formik';
 import * as Yup from 'yup';
 import { toast, ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import { MoonIcon, SunIcon, EyeIcon, EyeSlashIcon } from '@heroicons/react/24/solid';
+import {UserContext} from "../contexts/UserContext.jsx";
 
 const Login = () => {
     const navigate = useNavigate();
-    const { login } = useContext(AuthContext);
+    const { login } = useContext(UserContext);
     const { darkMode, toggleDarkMode } = useContext(DarkModeContext);
 
-    // State pour gérer la visibilité du mot de passe
     const [showPassword, setShowPassword] = useState(false);
 
     const togglePasswordVisibility = () => {
         setShowPassword(!showPassword);
+    };
+
+    const handleLogin = async (values) => {
+        const result = await login(values);
+        if (result.success) {
+            navigate("/", { state: {fromLogin: true}});
+        }
     };
 
     const validationSchema = Yup.object({
@@ -26,21 +32,6 @@ const Login = () => {
             .min(6, 'Le mot de passe doit avoir au moins 6 caractères')
             .required('Mot de passe requis')
     });
-
-    const handleLogin = (values) => {
-        const { email, password } = values;
-
-        const storedUser = JSON.parse(localStorage.getItem('user'));
-
-        if (storedUser && email === storedUser.email && password === storedUser.password) {
-            login(storedUser);
-            navigate('/', { state: { fromLogin: true } });
-        } else {
-            toast.error('Identifiants incorrects', {
-                autoClose: 3000,
-            });
-        }
-    };
 
     return (
         <div className="bg-white dark:bg-gray-900 transition-all">

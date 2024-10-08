@@ -1,14 +1,15 @@
 import React from 'react';
-import { DarkModeProvider } from './contexts/DarkModeContext'; // Importer le DarkModeProvider
+import { DarkModeProvider } from './contexts/DarkModeContext';
 import Navbar from './pages/Navbar';
 import Home from './pages/Home';
+import {UserProvider} from "./contexts/UserContext.jsx";
 
 function App() {
     return (
-        <DarkModeProvider>
-            <Navbar />
-            <Home />
-        </DarkModeProvider>
+        <div>
+                <Navbar />
+                <Home />
+        </div>
     );
 }
 

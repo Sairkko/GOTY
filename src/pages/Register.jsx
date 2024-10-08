@@ -1,25 +1,30 @@
-import React, { useContext, useState } from 'react'; // Importer useState
-import { useNavigate } from 'react-router-dom';
-import { AuthContext } from '../contexts/AuthContext.jsx';
-import { DarkModeContext } from '../contexts/DarkModeContext.jsx'; // Importer DarkModeContext
+import React, { useContext, useState } from 'react';
+import { DarkModeContext } from '../contexts/DarkModeContext.jsx';
 import { Formik, Form, Field, ErrorMessage } from 'formik';
 import * as Yup from 'yup';
-import { MoonIcon, SunIcon, EyeIcon, EyeSlashIcon } from '@heroicons/react/24/solid'; // Icons for the toggle button
+import { MoonIcon, SunIcon, EyeIcon, EyeSlashIcon } from '@heroicons/react/24/solid';
+import {toast, ToastContainer} from "react-toastify";
+import {UserContext} from "../contexts/UserContext.jsx";
+import {useNavigate} from "react-router-dom";
 
 const Register = () => {
-    const navigate = useNavigate();
-    const { login } = useContext(AuthContext);
-    const { darkMode, toggleDarkMode } = useContext(DarkModeContext); // Utiliser le contexte dark mode
+    const { register, loading } = useContext(UserContext);
+    const { darkMode, toggleDarkMode } = useContext(DarkModeContext);
 
-    // State pour gérer la visibilité du mot de passe
     const [showPassword, setShowPassword] = useState(false);
+    const [showConfirmPassword, setShowConfirmPassword] = useState(false); // État pour la visibilité du champ "Confirmez le mot de passe"
+    const navigate = useNavigate();
 
     const togglePasswordVisibility = () => {
         setShowPassword(!showPassword);
     };
 
+    const toggleConfirmPasswordVisibility = () => {
+        setShowConfirmPassword(!showConfirmPassword);
+    };
+
     const validationSchema = Yup.object({
-        name: Yup.string().required('Nom requis'),
+        firstname: Yup.string().required('Nom requis'),
         lastname: Yup.string().required('Prénom requis'),
         username: Yup.string().required('Pseudo requis'),
         email: Yup.string().email('Email invalide').required('Email requis'),
@@ -31,20 +36,16 @@ const Register = () => {
             .required('Confirmation de mot de passe requise')
     });
 
-    const handleRegister = (values) => {
-        const { name, email, lastname, username, password } = values;
-        if (name && email && lastname && username && password) {
-            const userData = { name, email, lastname, username, password };
-            localStorage.setItem('user', JSON.stringify(userData));
-
-            login(userData);
-            navigate('/auth/login');
+    const handleRegister = async (values) => {
+        const result = await register(values);
+        if (result.success) {
+            navigate("/email-confirmation");
         }
     };
 
     return (
         <div className="bg-white dark:bg-gray-900 transition-all">
-
+            <ToastContainer />
             <div className="flex justify-center p-4">
                 <button
                     onClick={toggleDarkMode}
@@ -60,7 +61,7 @@ const Register = () => {
 
             <Formik
                 initialValues={{
-                    name: '',
+                    firstname: '',
                     lastname: '',
                     username: '',
                     email: '',
@@ -76,11 +77,11 @@ const Register = () => {
                             <label className="block text-sm font-medium text-gray-700 dark:text-gray-200">Nom:</label>
                             <Field
                                 type="text"
-                                name="name"
+                                name="firstname"
                                 className="mt-1 block w-full border-gray-300 border-2 rounded-md shadow-sm p-2 focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm dark:bg-gray-700 dark:border-gray-600 dark:text-white"
                             />
                             <ErrorMessage
-                                name="name"
+                                name="firstname"
                                 component="div"
                                 className="text-red-500 text-sm mt-1"
                             />
@@ -132,7 +133,7 @@ const Register = () => {
                             <label className="block text-sm font-medium text-gray-700 dark:text-gray-200">Mot de passe:</label>
                             <div className="relative">
                                 <Field
-                                    type={showPassword ? "text" : "password"} // Changer le type de champ
+                                    type={showPassword ? "text" : "password"}
                                     name="password"
                                     className="mt-1 block w-full border-gray-300 border-2 rounded-md shadow-sm p-2 focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm dark:bg-gray-700 dark:border-gray-600 dark:text-white"
                                 />
@@ -153,11 +154,20 @@ const Register = () => {
 
                         <div>
                             <label className="block text-sm font-medium text-gray-700 dark:text-gray-200">Confirmez le mot de passe:</label>
-                            <Field
-                                type="password"
-                                name="confirmPassword"
-                                className="mt-1 block w-full border-gray-300 border-2 rounded-md shadow-sm p-2 focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm dark:bg-gray-700 dark:border-gray-600 dark:text-white"
-                            />
+                            <div className="relative">
+                                <Field
+                                    type={showConfirmPassword ? "text" : "password"}
+                                    name="confirmPassword"
+                                    className="mt-1 block w-full border-gray-300 border-2 rounded-md shadow-sm p-2 focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm dark:bg-gray-700 dark:border-gray-600 dark:text-white"
+                                />
+                                <button
+                                    type="button"
+                                    onClick={toggleConfirmPasswordVisibility}
+                                    className="absolute inset-y-0 right-3 flex items-center text-gray-400 dark:text-gray-200"
+                                >
+                                    {showConfirmPassword ? <EyeSlashIcon className="w-5 h-5 dark:text-black" /> : <EyeIcon className="w-5 h-5 dark:text-black" />}
+                                </button>
+                            </div>
                             <ErrorMessage
                                 name="confirmPassword"
                                 component="div"
@@ -169,8 +179,9 @@ const Register = () => {
                             <button
                                 type="submit"
                                 className="w-full bg-indigo-600 text-white py-2 px-4 rounded-md text-lg font-semibold hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:opacity-50"
+                                disabled={loading || isSubmitting}
                             >
-                                S'inscrire
+                                {loading ? 'Inscription en cours...' : 'S\'inscrire'}
                             </button>
                         </div>
                     </Form>

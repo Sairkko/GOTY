@@ -1,11 +1,37 @@
 import React, { useContext } from 'react';
-import { Link } from 'react-router-dom';
+import {Link, useNavigate} from 'react-router-dom';
 import { DarkModeContext } from '../contexts/DarkModeContext';
 import { MoonIcon, SunIcon } from '@heroicons/react/24/solid';
 import logo from "../assets/img.png";
+import {toast} from "react-toastify";
+import {UserContext} from "../contexts/UserContext.jsx";
 
 const Navbar = () => {
+    const navigate = useNavigate();
     const { darkMode, toggleDarkMode } = useContext(DarkModeContext);
+    const { isLoggedIn, logout } = useContext(UserContext);
+
+    const handleLogout = async () => {
+        const token = localStorage.getItem("token");
+
+        const response = await fetch("http://localhost:3000/logout", {
+            method: "POST",
+            headers: {
+                "Authorization": `Bearer ${token}`,
+            },
+        });
+
+        const data = await response.json();
+
+        if (data.success) {
+            localStorage.removeItem("token");
+            logout();
+            navigate("/auth/login");
+        } else {
+            toast.error("Erreur lors de la déconnexion");
+        }
+    };
+
 
     return (
         <nav className="p-4 bg-white dark:bg-gray-700 shadow-md transition-colors duration-300">
@@ -28,19 +54,30 @@ const Navbar = () => {
                         )}
                     </button>
 
-                    <Link
-                        to="/auth/login"
-                        className="ml-4 text-gray-900 dark:text-white transition-colors duration-300 hover:text-gray-700 dark:hover:text-gray-300"
-                    >
-                        Connexion
-                    </Link>
+                    {isLoggedIn ? (
+                        <button
+                            onClick={logout}
+                            className="ml-4 text-gray-900 dark:text-white transition-colors duration-300 hover:text-gray-700 dark:hover:text-gray-300"
+                        >
+                            Déconnexion
+                        </button>
+                    ) : (
+                        <>
+                            <Link
+                                to="/auth/login"
+                                className="ml-4 text-gray-900 dark:text-white transition-colors duration-300 hover:text-gray-700 dark:hover:text-gray-300"
+                            >
+                                Connexion
+                            </Link>
 
-                    <Link
-                        to="/auth/register"
-                        className="ml-4 text-gray-900 dark:text-white transition-colors duration-300 hover:text-gray-700 dark:hover:text-gray-300"
-                    >
-                        Inscription
-                    </Link>
+                            <Link
+                                to="/auth/register"
+                                className="ml-4 text-gray-900 dark:text-white transition-colors duration-300 hover:text-gray-700 dark:hover:text-gray-300"
+                            >
+                                Inscription
+                            </Link>
+                        </>
+                    )}
                 </div>
             </div>
         </nav>
