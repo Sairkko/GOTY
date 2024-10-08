@@ -1,13 +1,15 @@
-import Home from "./pages/Home.jsx";
-import Navbar from "./pages/Navbar.jsx";
+import React from 'react';
+import { DarkModeProvider } from './contexts/DarkModeContext'; // Importer le DarkModeProvider
+import Navbar from './pages/Navbar';
+import Home from './pages/Home';
 
-const App = () => {
+function App() {
     return (
-        <div>
-            <Navbar/>
-            <Home/>
-        </div>
-    )
-};
+        <DarkModeProvider>
+            <Navbar />
+            <Home />
+        </DarkModeProvider>
+    );
+}
 
 export default App;
