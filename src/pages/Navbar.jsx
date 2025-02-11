@@ -56,7 +56,7 @@ const Navbar = () => {
 
                     {isLoggedIn ? (
                         <button
-                            onClick={logout}
+                            onClick={handleLogout}
                             className="ml-4 text-gray-900 dark:text-white transition-colors duration-300 hover:text-gray-700 dark:hover:text-gray-300"
                         >
                             Déconnexion
