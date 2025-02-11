@@ -99,9 +99,10 @@ const Login = () => {
                         <div className="flex justify-center">
                             <button
                                 type="submit"
+                                disabled={isSubmitting}
                                 className="text-center w-full bg-blue-600 text-white py-2 px-4 rounded-md text-lg font-semibold hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50"
                             >
-                                Se connecter
+                                {isSubmitting ? 'Connexion en cours...' : 'Se connecter'}
                             </button>
                         </div>
                     </Form>
