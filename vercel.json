@@ -2,7 +2,7 @@
   "rewrites": [
     {
       "source": "/(.*)",
-      "destination": "https://jdr-lotr-back.onrender.com/$1"
+      "destination": "/index.html"
     }
   ]
 }
