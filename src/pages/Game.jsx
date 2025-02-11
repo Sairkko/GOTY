@@ -29,7 +29,7 @@ const Game = () => {
     }, [gameState]);
 
     useEffect(() => {
-        const newSocket = io('http://localhost:3000');
+        const newSocket = io('http://0.0.0.0:10000');
         setSocket(newSocket);
 
         // Rejoindre la partie

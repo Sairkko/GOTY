@@ -13,12 +13,12 @@ const Home = () => {
     const [scoreboard, setScoreboard] = useState([]);
     const [showScoresModal, setShowScoresModal] = useState(false);
     const navigate = useNavigate();
-    const socket = io('http://localhost:3000');
+    const socket = io('http://0.0.0.0:10000');
 
     // Récupération de toutes les parties
     const fetchUserGames = async () => {
         try {
-            const response = await axios.get('http://localhost:3000/games', {
+            const response = await axios.get('http://0.0.0.0:10000/games', {
                 headers: { 'Authorization': `Bearer ${user.token}` }
             });
             if (response.status === 200) {
@@ -36,10 +36,10 @@ const Home = () => {
     // Calcul du scoreboard modifié pour ne prendre en compte que les parties terminées et avec un winner
     const fetchScoreboard = async () => {
         try {
-            const usersResponse = await axios.get('http://localhost:3000/users', {
+            const usersResponse = await axios.get('http://0.0.0.0:10000:3000/users', {
                 headers: { 'Authorization': `Bearer ${user.token}` }
             });
-            const gamesResponse = await axios.get('http://localhost:3000/games', {
+            const gamesResponse = await axios.get('http://0.0.0.0:10000/games', {
                 headers: { 'Authorization': `Bearer ${user.token}` }
             });
             if (usersResponse.status === 200 && gamesResponse.status === 200) {
@@ -87,7 +87,7 @@ const Home = () => {
         }
         try {
             const response = await axios.post(
-                'http://localhost:3000/game',
+                'http://0.0.0.0:10000/game',
                 { userId: user.user.id },
                 {
                     headers: {
@@ -114,7 +114,7 @@ const Home = () => {
 
     const joinGame = async (gameId, userId) => {
         try {
-            await axios.patch(`http://localhost:3000/game/start/${gameId}`, { userId }, {
+            await axios.patch(`http://0.0.0.0:10000/game/start/${gameId}`, { userId }, {
                 headers: { 'Authorization': `Bearer ${user.token}` }
             });
             // Naviguer vers la partie et notifier le serveur via Socket.io
