@@ -17,7 +17,7 @@ export const UserProvider = ({ children }) => {
         const { firstname, email, lastname, username, password } = values;
 
         try {
-            const response = await axios.post(`https://dpg-culherdsvqrc73ce1mm0-a:10000/register`, {
+            const response = await axios.post(`https://jdr-lotr-back.onrender.com/register`, {
                 firstname,
                 email,
                 lastname,

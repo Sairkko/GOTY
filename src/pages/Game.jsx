@@ -29,7 +29,7 @@ const Game = () => {
     }, [gameState]);
 
     useEffect(() => {
-        const newSocket = io('http://0.0.0.0:10000');
+        const newSocket = io('https://jdr-lotr-back.onrender.com');
         setSocket(newSocket);
 
         // Rejoindre la partie

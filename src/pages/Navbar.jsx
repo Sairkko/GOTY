@@ -14,7 +14,7 @@ const Navbar = () => {
     const handleLogout = async () => {
         const token = localStorage.getItem("token");
 
-        const response = await fetch("http://0.0.0.0:10000/logout", {
+        const response = await fetch("https://jdr-lotr-back.onrender.com/logout", {
             method: "POST",
             headers: {
                 "Authorization": `Bearer ${token}`,
