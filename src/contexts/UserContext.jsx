@@ -17,7 +17,7 @@ export const UserProvider = ({ children }) => {
         const { firstname, email, lastname, username, password } = values;
 
         try {
-            const response = await axios.post(`/register`, {
+            const response = await axios.post(`https://jdr-lotr-back.onrender.com/register`, {
                 firstname,
                 email,
                 lastname,
@@ -45,7 +45,7 @@ export const UserProvider = ({ children }) => {
         const { email, password } = values;
 
         try {
-            const response = await axios.post(`/login`, {
+            const response = await axios.post(`https://jdr-lotr-back.onrender.com/login`, {
                 email,
                 password
             });
