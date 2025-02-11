@@ -1,13 +1,13 @@
 import React, { createContext, useState, useEffect } from 'react';
 import { toast } from 'react-toastify';
 import axios from "axios";
+import { jwtDecode } from "jwt-decode";
 
 export const UserContext = createContext();
 
 export const UserProvider = ({ children }) => {
     const [user, setUser] = useState(null);
     const [loading, setLoading] = useState(false);
-
     const [isLoggedIn, setIsLoggedIn] = useState(false);
 
     const API_URL = import.meta.env.VITE_APP_API_URL;
@@ -53,8 +53,14 @@ export const UserProvider = ({ children }) => {
             const data = response.data;
 
             if (data.token) {
+                const decodedToken = jwtDecode(data.token);  // Décoder le token JWT
+
+                // Stocker le token et l'utilisateur décodé dans localStorage
                 localStorage.setItem("token", data.token);
-                setUser(data.token);
+                localStorage.setItem("user", JSON.stringify(decodedToken));  // Stocke l'utilisateur en tant que chaîne JSON
+
+                // Mettre à jour l'état avec le token et les infos utilisateur décodées
+                setUser({ token: data.token, user: decodedToken });
                 setIsLoggedIn(true);
                 toast.success('Connexion réussie !');
                 return { success: true };
@@ -70,6 +76,7 @@ export const UserProvider = ({ children }) => {
 
     const logout = () => {
         localStorage.removeItem("token");
+        localStorage.removeItem("user");
         setUser(null);
         setIsLoggedIn(false);
         toast.success('Déconnexion réussie.');
@@ -78,8 +85,18 @@ export const UserProvider = ({ children }) => {
 
     useEffect(() => {
         const token = localStorage.getItem("token");
-        if (token) {
-            setUser({ email: "exemple@mail.com" });
+        let storedUser = localStorage.getItem("user");
+
+        // Vérifie si storedUser est un objet ou une chaîne
+        try {
+            storedUser = typeof storedUser === 'string' ? JSON.parse(storedUser) : storedUser;
+        } catch (error) {
+            console.error("Erreur lors du parsing JSON de l'utilisateur : ", error);
+            storedUser = null;
+        }
+
+        if (token && storedUser) {
+            setUser({ token: token, user: storedUser });
             setIsLoggedIn(true);
         }
     }, []);

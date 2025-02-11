@@ -3,25 +3,36 @@ import './index.css';
 import './App.css';
 import { createBrowserRouter, RouterProvider } from 'react-router-dom';
 import React from 'react';
-import AuthLayout from './components/AuthLayout.jsx';
-import App from './App.jsx';
 import { DarkModeProvider } from './contexts/DarkModeContext';
+import { UserProvider } from './contexts/UserContext.jsx';
 import EmailConfirmation from "./pages/EmailConfirmation.jsx";
-import {UserProvider} from "./contexts/UserContext.jsx";
+import Game from "./pages/Game.jsx";
+import AuthLayout from './components/AuthLayout.jsx';
+import MainLayout from './components/MainLayout.jsx';
+import App from "./App.jsx";
 
 const router = createBrowserRouter([
     {
-        path: '/',
-        element: <App />,
+        element: <MainLayout />,
+        children: [
+            {
+                path: '/',
+                element: <App />,
+            },
+            {
+                path: '/game/:gameId',
+                element: <Game />,
+            },
+            {
+                path: '/email-confirmation',
+                element: <EmailConfirmation />,
+            },
+        ],
     },
     {
-        path: '/auth/:mode',
+        path: '/auth/:mode', // Pas de navbar pour l'authentification
         element: <AuthLayout />,
     },
-    {
-        path: '/email-confirmation',
-        element: <EmailConfirmation />,
-    }
 ]);
 
 createRoot(document.getElementById('root')).render(
