@@ -17,7 +17,7 @@ export const UserProvider = ({ children }) => {
         const { firstname, email, lastname, username, password } = values;
 
         try {
-            const response = await axios.post(`${API_URL}/register`, {
+            const response = await axios.post(`https://goty-phozqwwan-sairkkos-projects.vercel.app/register`, {
                 firstname,
                 email,
                 lastname,
