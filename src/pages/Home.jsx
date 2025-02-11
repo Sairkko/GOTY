@@ -18,7 +18,7 @@ const Home = () => {
     // Récupération de toutes les parties
     const fetchUserGames = async () => {
         try {
-            const response = await axios.get('/api/games', {
+            const response = await axios.get('https://jdr-lotr-back.onrender.com/games', {
                 headers: { 'Authorization': `Bearer ${user.token}` }
             });
             if (response.status === 200) {
@@ -36,10 +36,10 @@ const Home = () => {
     // Calcul du scoreboard modifié pour ne prendre en compte que les parties terminées et avec un winner
     const fetchScoreboard = async () => {
         try {
-            const usersResponse = await axios.get('/api/users', {
+            const usersResponse = await axios.get('https://jdr-lotr-back.onrender.com/users', {
                 headers: { 'Authorization': `Bearer ${user.token}` }
             });
-            const gamesResponse = await axios.get('/api/games', {
+            const gamesResponse = await axios.get('https://jdr-lotr-back.onrender.com/games', {
                 headers: { 'Authorization': `Bearer ${user.token}` }
             });
             if (usersResponse.status === 200 && gamesResponse.status === 200) {
@@ -87,7 +87,7 @@ const Home = () => {
         }
         try {
             const response = await axios.post(
-                '/api/game',
+                'https://jdr-lotr-back.onrender.com/game',
                 { userId: user.user.id },
                 {
                     headers: {
@@ -114,7 +114,7 @@ const Home = () => {
 
     const joinGame = async (gameId, userId) => {
         try {
-            await axios.patch(`/api/game/start/${gameId}`, { userId }, {
+            await axios.patch(`https://jdr-lotr-back.onrender.com/game/start/${gameId}`, { userId }, {
                 headers: { 'Authorization': `Bearer ${user.token}` }
             });
             // Naviguer vers la partie et notifier le serveur via Socket.io
