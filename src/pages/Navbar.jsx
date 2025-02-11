@@ -23,7 +23,7 @@ const Navbar = () => {
 
         const data = await response.json();
 
-        if (data.success) {
+        if (data.logout) {  // Vérifiez la propriété logout ici
             localStorage.removeItem("token");
             logout();
             navigate("/auth/login");
@@ -31,7 +31,6 @@ const Navbar = () => {
             toast.error("Erreur lors de la déconnexion");
         }
     };
-
 
     return (
         <nav className="p-4 bg-white dark:bg-gray-700 shadow-md transition-colors duration-300">
