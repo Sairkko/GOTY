@@ -46,10 +46,9 @@ const Profile = () => {
                 
                 // Calculer les statistiques
                 const stats = {
-                    total: userGames.length,
                     won: userGames.filter(game => game.winner === user.user.id).length,
-                    pending: userGames.filter(game => game.state === 'pending').length,
-                    playing: userGames.filter(game => game.state === 'playing').length
+                    lost: userGames.filter(game => game.state === 'finished' && game.winner !== user.user.id).length,
+                    playing: userGames.filter(game => game.state === 'playing' || game.state === 'pending').length
                 };
                 
                 setUserHistory({ games: userGames, stats });
@@ -119,15 +118,7 @@ const Profile = () => {
                 ) : userHistory && (
                     <>
                         {/* Statistiques */}
-                        <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-8">
-                            <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-lg">
-                                <div className="text-3xl font-bold text-blue-600 dark:text-blue-400">
-                                    {userHistory.stats.total}
-                                </div>
-                                <div className="text-sm text-gray-600 dark:text-gray-400">
-                                    Parties totales
-                                </div>
-                            </div>
+                        <div className="grid grid-cols-3 gap-4 mb-8">
                             <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-lg">
                                 <div className="text-3xl font-bold text-green-600 dark:text-green-400">
                                     {userHistory.stats.won}
@@ -137,15 +128,15 @@ const Profile = () => {
                                 </div>
                             </div>
                             <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-lg">
-                                <div className="text-3xl font-bold text-yellow-600 dark:text-yellow-400">
-                                    {userHistory.stats.pending}
+                                <div className="text-3xl font-bold text-red-600 dark:text-red-400">
+                                    {userHistory.stats.lost}
                                 </div>
                                 <div className="text-sm text-gray-600 dark:text-gray-400">
-                                    En attente
+                                    Défaites
                                 </div>
                             </div>
                             <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-lg">
-                                <div className="text-3xl font-bold text-purple-600 dark:text-purple-400">
+                                <div className="text-3xl font-bold text-yellow-600 dark:text-yellow-400">
                                     {userHistory.stats.playing}
                                 </div>
                                 <div className="text-sm text-gray-600 dark:text-gray-400">
