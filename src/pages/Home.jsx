@@ -19,6 +19,23 @@ const Home = () => {
     const navigate = useNavigate();
     const socket = io('https://jdr-lotr-back.onrender.com');
 
+    // Fonction pour récupérer les parties
+    const fetchUserGames = async () => {
+        try {
+            const response = await axios.get('https://jdr-lotr-back.onrender.com/games', {
+                headers: { 'Authorization': `Bearer ${user.token}` }
+            });
+            if (response.status === 200) {
+                setGames(response.data);
+            } else {
+                toast.error("Erreur lors de la récupération des parties.");
+            }
+        } catch (error) {
+            toast.error("Une erreur est survenue lors de la récupération des parties.");
+            console.error("Erreur:", error);
+        }
+    };
+
     // Fonction pour charger les données initiales
     const fetchInitialData = async () => {
         setIsLoading(true);
