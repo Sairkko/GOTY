@@ -146,12 +146,12 @@ const Game = () => {
                             <div
                                 key={colIndex}
                                 onClick={() => handleColumnClick(colIndex)}
-                                className="w-16 h-16 border border-gray-400 dark:border-gray-600 flex items-center justify-center bg-white dark:bg-gray-800 rounded-full cursor-pointer hover:shadow-lg"
+                                className="w-8 h-8 sm:w-12 sm:h-12 md:w-16 md:h-16 border border-gray-400 dark:border-gray-600 flex items-center justify-center bg-white dark:bg-gray-800 rounded-full cursor-pointer hover:shadow-lg transition-shadow"
                             >
                                 {cell === 1 ? (
-                                    <span className="text-3xl">🔴</span>
+                                    <span className="text-xl sm:text-2xl md:text-3xl">🔴</span>
                                 ) : cell === 2 ? (
-                                    <span className="text-3xl">🟡</span>
+                                    <span className="text-xl sm:text-2xl md:text-3xl">🟡</span>
                                 ) : null}
                             </div>
                         ))}
@@ -209,16 +209,16 @@ const Game = () => {
     // Écran de jeu
     const renderGameScreen = () => {
         return (
-            <div className="flex flex-col items-center">
-                <h2 className="text-2xl font-bold mb-4 text-gray-800 dark:text-white">Partie en cours</h2>
+            <div className="flex flex-col items-center max-w-full">
+                <h2 className="text-xl sm:text-2xl font-bold mb-4 text-gray-800 dark:text-white">Partie en cours</h2>
                 {renderCoinToss()}
                 {/* Afficher le message de tour seulement si le coin toss est terminé */}
                 {coinTossDone && !coinTossAnimating && (
                     <div className="mb-4">
                         {currentTurn === user.user.id ? (
-                            <p className="text-green-600 dark:text-green-400 font-semibold">C'est votre tour</p>
+                            <p className="text-sm sm:text-base text-green-600 dark:text-green-400 font-semibold">C'est votre tour</p>
                         ) : (
-                            <p className="text-blue-600 dark:text-blue-400 font-semibold">En attente du tour de l'autre joueur</p>
+                            <p className="text-sm sm:text-base text-blue-600 dark:text-blue-400 font-semibold">En attente du tour de l'autre joueur</p>
                         )}
                     </div>
                 )}
@@ -226,7 +226,7 @@ const Game = () => {
                 {players[0] === user.user.id && (
                     <button
                         onClick={handleEndGame}
-                        className="mt-4 px-6 py-2 bg-red-500 text-white rounded hover:bg-red-600 transition"
+                        className="mt-4 px-4 sm:px-6 py-2 bg-red-500 text-white text-sm sm:text-base rounded hover:bg-red-600 transition"
                     >
                         Terminer la partie
                     </button>
@@ -240,13 +240,13 @@ const Game = () => {
         const width = window.innerWidth;
         const height = window.innerHeight;
         return (
-            <div className="flex flex-col items-center justify-start space-y-6 p-8 bg-white dark:bg-gray-800 rounded-lg shadow-xl w-full max-w-lg">
+            <div className="flex flex-col items-center justify-start space-y-6 p-4 sm:p-8 bg-white dark:bg-gray-800 rounded-lg shadow-xl w-full max-w-lg mx-2">
                 {/* Composant Confetti */}
                 <Confetti className="absolute top-0 left-0" width={width} height={height} recycle={false} numberOfPieces={500} />
-                <h2 className="text-3xl font-bold text-gray-800 dark:text-white">{message}</h2>
+                <h2 className="text-xl sm:text-3xl font-bold text-gray-800 dark:text-white text-center">{message}</h2>
                 <button
                     onClick={() => navigate('/')}
-                    className="px-6 py-3 bg-blue-500 text-white rounded hover:bg-blue-600 transition"
+                    className="px-4 sm:px-6 py-2 sm:py-3 bg-blue-500 text-white text-sm sm:text-base rounded hover:bg-blue-600 transition"
                 >
                     Retour à l'accueil
                 </button>
@@ -255,10 +255,8 @@ const Game = () => {
     };
 
     return (
-        // Pour l'affichage, nous centrons verticalement pendant le jeu et l'attente,
-        // mais pour l'écran de fin, nous alignons en haut.
-        <div className={`min-h-screen flex flex-col items-center ${gameState === "finished" ? "justify-start" : "justify-center"} bg-gray-100 dark:bg-gray-900 p-4`}>
-            <h1 className="text-4xl font-bold mb-8 text-gray-800 dark:text-white">Partie {gameId}</h1>
+        <div className={`min-h-screen flex flex-col items-center ${gameState === "finished" ? "justify-start pt-8" : "justify-center"} bg-gray-100 dark:bg-gray-900 p-2 sm:p-4`}>
+            <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold mb-4 sm:mb-8 text-gray-800 dark:text-white">Partie {gameId}</h1>
             {gameState === "waiting" && renderWaitingScreen()}
             {gameState === "playing" && renderGameScreen()}
             {gameState === "finished" && renderFinishedScreen()}
