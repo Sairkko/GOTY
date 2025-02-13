@@ -12,6 +12,7 @@ const Home = () => {
     const [games, setGames] = useState([]);
     const [scoreboard, setScoreboard] = useState([]);
     const [showScoresModal, setShowScoresModal] = useState(false);
+    const [show1v1Only, setShow1v1Only] = useState(false);
     const navigate = useNavigate();
     const socket = io('https://jdr-lotr-back.onrender.com');
 
@@ -32,7 +33,6 @@ const Home = () => {
         }
     };
 
-    // Calcul du scoreboard (inchangé)
     // Calcul du scoreboard modifié pour ne prendre en compte que les parties terminées et avec un winner
     const fetchScoreboard = async () => {
         try {
@@ -45,9 +45,15 @@ const Home = () => {
             if (usersResponse.status === 200 && gamesResponse.status === 200) {
                 const users = usersResponse.data;
                 // On ne prend en compte que les parties terminées ET qui ont un gagnant
-                const finishedGames = gamesResponse.data.filter(
+                let finishedGames = gamesResponse.data.filter(
                     game => game.state === 'finished' && game.winner
                 );
+
+                // Filtrer pour les parties 1v1 si l'option est activée
+                if (show1v1Only) {
+                    finishedGames = finishedGames.filter(game => game.player !== null);
+                }
+
                 const scoreboardData = users.map(u => {
                     const played = finishedGames.filter(
                         g => g.creator === u.id || g.player === u.id
@@ -62,7 +68,7 @@ const Home = () => {
                         won,
                         winRate
                     };
-                });
+                }).filter(user => user.played > 0);
                 setScoreboard(scoreboardData);
             }
         } catch (error) {
@@ -261,8 +267,24 @@ const Home = () => {
             {/* Modale du scoreboard */}
             {showScoresModal && (
                 <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50">
-                    <div className="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-6 max-w-3xl w-full relative">
-                        <h2 className="text-2xl font-bold mb-4 text-gray-800 dark:text-white">Scoreboard</h2>
+                    <div className="bg-white dark:bg-gray-800 p-8 rounded-lg shadow-xl max-w-4xl w-full max-h-[90vh] overflow-y-auto">
+                        <div className="flex justify-between items-center mb-6">
+                            <h2 className="text-2xl font-bold text-gray-800 dark:text-white">Scoreboard</h2>
+                            <div className="flex items-center space-x-4">
+                                <label className="flex items-center space-x-2 text-gray-700 dark:text-gray-300">
+                                    <input
+                                        type="checkbox"
+                                        checked={show1v1Only}
+                                        onChange={(e) => {
+                                            setShow1v1Only(e.target.checked);
+                                            fetchScoreboard();
+                                        }}
+                                        className="form-checkbox h-5 w-5 text-blue-600"
+                                    />
+                                    <span>Parties 1v1 uniquement</span>
+                                </label>
+                            </div>
+                        </div>
                         {scoreboard.length > 0 ? (
                             <table className="min-w-full divide-y divide-gray-200">
                                 <thead>
