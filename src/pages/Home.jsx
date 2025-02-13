@@ -14,90 +14,100 @@ const Home = () => {
     const [showScoresModal, setShowScoresModal] = useState(false);
     const [show1v1Only, setShow1v1Only] = useState(false);
     const [isLoading, setIsLoading] = useState(false);
+    const [usersData, setUsersData] = useState([]);
+    const [gamesData, setGamesData] = useState([]);
     const navigate = useNavigate();
     const socket = io('https://jdr-lotr-back.onrender.com');
 
-    // Récupération de toutes les parties
-    const fetchUserGames = async () => {
-        try {
-            const response = await axios.get('https://jdr-lotr-back.onrender.com/games', {
-                headers: { 'Authorization': `Bearer ${user.token}` }
-            });
-            if (response.status === 200) {
-                setGames(response.data);
-            } else {
-                toast.error("Erreur lors de la récupération des parties.");
-            }
-        } catch (error) {
-            toast.error("Une erreur est survenue lors de la récupération des parties.");
-            console.error("Erreur:", error);
-        }
-    };
-
-    // Calcul du scoreboard modifié pour ne prendre en compte que les parties terminées et avec un winner
-    const fetchScoreboard = async () => {
+    // Fonction pour charger les données initiales
+    const fetchInitialData = async () => {
         setIsLoading(true);
         try {
-            const usersResponse = await axios.get('https://jdr-lotr-back.onrender.com/users', {
-                headers: { 'Authorization': `Bearer ${user.token}` }
-            });
-            const gamesResponse = await axios.get('https://jdr-lotr-back.onrender.com/games', {
-                headers: { 'Authorization': `Bearer ${user.token}` }
-            });
-            if (usersResponse.status === 200 && gamesResponse.status === 200) {
-                const users = usersResponse.data;
-                // On ne prend en compte que les parties terminées ET qui ont un gagnant
-                let finishedGames = gamesResponse.data.filter(
-                    game => game.state === 'finished' && game.winner
-                );
+            const [usersResponse, gamesResponse] = await Promise.all([
+                axios.get('https://jdr-lotr-back.onrender.com/users', {
+                    headers: { 'Authorization': `Bearer ${user.token}` }
+                }),
+                axios.get('https://jdr-lotr-back.onrender.com/games', {
+                    headers: { 'Authorization': `Bearer ${user.token}` }
+                })
+            ]);
 
-                if (show1v1Only) {
-                    // Pour les parties 1v1, on garde les parties avec un creator et un player
-                    finishedGames = finishedGames.filter(game => game.player !== null);
-                    // Créer un tableau des matchs 1v1 avec les détails
-                    const matchDetails = finishedGames.map(game => {
-                        const creator = users.find(u => u.id === game.creator);
-                        const opponent = users.find(u => u.id === game.player);
-                        const winner = users.find(u => u.id === game.winner);
-                        const creatorWon = game.winner === game.creator;
-                        
-                        return {
-                            id: game.id,
-                            creator: creator ? creator.username : 'Inconnu',
-                            opponent: opponent ? opponent.username : 'Inconnu',
-                            winner: winner ? winner.username : 'Inconnu',
-                            score: creatorWon ? '1-0' : '0-1',
-                            creatorWon
-                        };
-                    });
-                    setScoreboard(matchDetails);
-                } else {
-                    // Code existant pour les stats globales
-                    const scoreboardData = users.map(u => {
-                        const played = finishedGames.filter(
-                            g => g.creator === u.id || g.player === u.id
-                        ).length;
-                        const won = finishedGames.filter(
-                            g => g.winner === u.id
-                        ).length;
-                        const winRate = played > 0 ? Math.round((won / played) * 100) : 0;
-                        return {
-                            username: u.username,
-                            played,
-                            won,
-                            winRate
-                        };
-                    }).filter(user => user.played > 0);
-                    setScoreboard(scoreboardData);
-                }
+            if (usersResponse.status === 200 && gamesResponse.status === 200) {
+                setUsersData(usersResponse.data);
+                setGamesData(gamesResponse.data);
+                updateScoreboard(usersResponse.data, gamesResponse.data);
             }
         } catch (error) {
-            toast.error("Erreur lors de la récupération du scoreboard.");
+            toast.error("Erreur lors de la récupération des données.");
             console.error("Erreur:", error);
         } finally {
             setIsLoading(false);
         }
     };
+
+    // Fonction pour mettre à jour le scoreboard
+    const updateScoreboard = (users, games) => {
+        // On ne prend en compte que les parties terminées ET qui ont un gagnant
+        let finishedGames = games.filter(
+            game => game.state === 'finished' && game.winner
+        );
+
+        if (show1v1Only) {
+            // Pour les parties 1v1, on garde les parties avec un creator et un player
+            finishedGames = finishedGames.filter(game => game.player !== null);
+            // Créer un tableau des matchs 1v1 avec les détails
+            const matchDetails = finishedGames.map(game => {
+                const creator = users.find(u => u.id === game.creator);
+                const opponent = users.find(u => u.id === game.player);
+                const winner = users.find(u => u.id === game.winner);
+                const creatorWon = game.winner === game.creator;
+                
+                return {
+                    id: game.id,
+                    creator: creator ? creator.username : 'Inconnu',
+                    opponent: opponent ? opponent.username : 'Inconnu',
+                    winner: winner ? winner.username : 'Inconnu',
+                    score: creatorWon ? '1-0' : '0-1',
+                    creatorWon
+                };
+            });
+            setScoreboard(matchDetails);
+        } else {
+            // Code existant pour les stats globales
+            const scoreboardData = users.map(u => {
+                const played = finishedGames.filter(
+                    g => g.creator === u.id || g.player === u.id
+                ).length;
+                const won = finishedGames.filter(
+                    g => g.winner === u.id
+                ).length;
+                const winRate = played > 0 ? Math.round((won / played) * 100) : 0;
+                return {
+                    username: u.username,
+                    played,
+                    won,
+                    winRate
+                };
+            }).filter(user => user.played > 0);
+            setScoreboard(scoreboardData);
+        }
+    };
+
+    // Effet pour charger les données initiales quand la modale s'ouvre
+    useEffect(() => {
+        if (showScoresModal) {
+            fetchInitialData();
+        }
+    }, [showScoresModal]);
+
+    // Effet pour mettre à jour le scoreboard quand on change de mode
+    useEffect(() => {
+        if (usersData.length > 0 && gamesData.length > 0) {
+            setIsLoading(true);
+            updateScoreboard(usersData, gamesData);
+            setIsLoading(false);
+        }
+    }, [show1v1Only]);
 
     useEffect(() => {
         if (isLoggedIn && user && user.token) {
@@ -107,12 +117,6 @@ const Home = () => {
             socket.disconnect();
         };
     }, [isLoggedIn, user]);
-
-    useEffect(() => {
-        if (showScoresModal) {
-            fetchScoreboard();
-        }
-    }, [show1v1Only]);
 
     const createGame = async () => {
         if (!isLoggedIn) {
@@ -206,7 +210,7 @@ const Home = () => {
                         <button
                             className="bg-indigo-500 text-white font-bold py-2 px-4 rounded hover:bg-indigo-700 transition-all"
                             onClick={() => {
-                                fetchScoreboard();
+                                fetchInitialData();
                                 setShowScoresModal(true);
                             }}
                         >
@@ -310,7 +314,7 @@ const Home = () => {
                                     <button
                                         onClick={() => {
                                             setShow1v1Only(false);
-                                            fetchScoreboard();
+                                            fetchInitialData();
                                         }}
                                         className={`px-4 py-2 rounded transition-all ${
                                             !show1v1Only 
@@ -323,7 +327,7 @@ const Home = () => {
                                     <button
                                         onClick={() => {
                                             setShow1v1Only(true);
-                                            fetchScoreboard();
+                                            fetchInitialData();
                                         }}
                                         className={`px-4 py-2 rounded transition-all ${
                                             show1v1Only 
