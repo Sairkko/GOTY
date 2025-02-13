@@ -49,27 +49,43 @@ const Home = () => {
                     game => game.state === 'finished' && game.winner
                 );
 
-                // Filtrer pour les parties 1v1 si l'option est activée
                 if (show1v1Only) {
+                    // Pour les parties 1v1, on garde les parties avec un creator et un player
                     finishedGames = finishedGames.filter(game => game.player !== null);
+                    // Créer un tableau des matchs 1v1 avec les détails
+                    const matchDetails = finishedGames.map(game => {
+                        const creator = users.find(u => u.id === game.creator);
+                        const opponent = users.find(u => u.id === game.player);
+                        const winner = users.find(u => u.id === game.winner);
+                        
+                        return {
+                            id: game.id,
+                            creator: creator ? creator.username : 'Inconnu',
+                            opponent: opponent ? opponent.username : 'Inconnu',
+                            winner: winner ? winner.username : 'Inconnu',
+                            creatorWon: game.winner === game.creator
+                        };
+                    });
+                    setScoreboard(matchDetails);
+                } else {
+                    // Code existant pour les stats globales
+                    const scoreboardData = users.map(u => {
+                        const played = finishedGames.filter(
+                            g => g.creator === u.id || g.player === u.id
+                        ).length;
+                        const won = finishedGames.filter(
+                            g => g.winner === u.id
+                        ).length;
+                        const winRate = played > 0 ? Math.round((won / played) * 100) : 0;
+                        return {
+                            username: u.username,
+                            played,
+                            won,
+                            winRate
+                        };
+                    }).filter(user => user.played > 0);
+                    setScoreboard(scoreboardData);
                 }
-
-                const scoreboardData = users.map(u => {
-                    const played = finishedGames.filter(
-                        g => g.creator === u.id || g.player === u.id
-                    ).length;
-                    const won = finishedGames.filter(
-                        g => g.winner === u.id
-                    ).length;
-                    const winRate = played > 0 ? Math.round((won / played) * 100) : 0;
-                    return {
-                        username: u.username,
-                        played,
-                        won,
-                        winRate
-                    };
-                }).filter(user => user.played > 0);
-                setScoreboard(scoreboardData);
             }
         } catch (error) {
             toast.error("Erreur lors de la récupération du scoreboard.");
@@ -302,26 +318,48 @@ const Home = () => {
                             </div>
 
                             {scoreboard.length > 0 ? (
-                                <table className="min-w-full divide-y divide-gray-200">
-                                    <thead>
-                                    <tr>
-                                        <th className="px-4 py-2 text-left text-sm font-bold text-gray-700 dark:text-gray-300">Nom</th>
-                                        <th className="px-4 py-2 text-left text-sm font-bold text-gray-700 dark:text-gray-300">Parties jouées</th>
-                                        <th className="px-4 py-2 text-left text-sm font-bold text-gray-700 dark:text-gray-300">Parties gagnées</th>
-                                        <th className="px-4 py-2 text-left text-sm font-bold text-gray-700 dark:text-gray-300">Pourcentage de victoire</th>
-                                    </tr>
-                                    </thead>
-                                    <tbody className="bg-white dark:bg-gray-800 divide-y divide-gray-200">
-                                    {scoreboard.map((userScore) => (
-                                        <tr key={userScore.username}>
-                                            <td className="px-4 py-2 text-sm text-gray-600 dark:text-gray-300">{userScore.username}</td>
-                                            <td className="px-4 py-2 text-sm text-gray-600 dark:text-gray-300">{userScore.played}</td>
-                                            <td className="px-4 py-2 text-sm text-gray-600 dark:text-gray-300">{userScore.won}</td>
-                                            <td className="px-4 py-2 text-sm text-gray-600 dark:text-gray-300">{userScore.winRate}%</td>
+                                show1v1Only ? (
+                                    <div className="space-y-4">
+                                        {scoreboard.map((match) => (
+                                            <div key={match.id} 
+                                                className="bg-gray-100 dark:bg-gray-700 p-4 rounded-lg shadow flex justify-between items-center">
+                                                <div className="flex items-center space-x-4">
+                                                    <div className={`text-lg ${match.creatorWon ? 'font-bold text-green-600 dark:text-green-400' : ''}`}>
+                                                        {match.creator}
+                                                    </div>
+                                                    <div className="text-lg font-bold">VS</div>
+                                                    <div className={`text-lg ${!match.creatorWon ? 'font-bold text-green-600 dark:text-green-400' : ''}`}>
+                                                        {match.opponent}
+                                                    </div>
+                                                </div>
+                                                <div className="text-sm text-gray-600 dark:text-gray-300">
+                                                    Gagnant : {match.winner}
+                                                </div>
+                                            </div>
+                                        ))}
+                                    </div>
+                                ) : (
+                                    <table className="min-w-full divide-y divide-gray-200">
+                                        <thead>
+                                        <tr>
+                                            <th className="px-4 py-2 text-left text-sm font-bold text-gray-700 dark:text-gray-300">Nom</th>
+                                            <th className="px-4 py-2 text-left text-sm font-bold text-gray-700 dark:text-gray-300">Parties jouées</th>
+                                            <th className="px-4 py-2 text-left text-sm font-bold text-gray-700 dark:text-gray-300">Parties gagnées</th>
+                                            <th className="px-4 py-2 text-left text-sm font-bold text-gray-700 dark:text-gray-300">Pourcentage de victoire</th>
                                         </tr>
-                                    ))}
-                                    </tbody>
-                                </table>
+                                        </thead>
+                                        <tbody className="bg-white dark:bg-gray-800 divide-y divide-gray-200">
+                                        {scoreboard.map((userScore) => (
+                                            <tr key={userScore.username}>
+                                                <td className="px-4 py-2 text-sm text-gray-600 dark:text-gray-300">{userScore.username}</td>
+                                                <td className="px-4 py-2 text-sm text-gray-600 dark:text-gray-300">{userScore.played}</td>
+                                                <td className="px-4 py-2 text-sm text-gray-600 dark:text-gray-300">{userScore.won}</td>
+                                                <td className="px-4 py-2 text-sm text-gray-600 dark:text-gray-300">{userScore.winRate}%</td>
+                                            </tr>
+                                        ))}
+                                        </tbody>
+                                    </table>
+                                )
                             ) : (
                                 <p className="text-gray-700 dark:text-gray-300">
                                     {show1v1Only ? "Aucune partie 1v1 trouvée." : "Aucun score disponible."}
