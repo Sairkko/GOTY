@@ -121,10 +121,12 @@ const Home = () => {
     useEffect(() => {
         if (usersData.length > 0 && gamesData.length > 0) {
             setIsLoading(true);
-            updateScoreboard(usersData, gamesData);
-            setIsLoading(false);
+            setTimeout(() => {
+                updateScoreboard(usersData, gamesData);
+                setIsLoading(false);
+            }, 100);
         }
-    }, [show1v1Only]);
+    }, [show1v1Only, usersData, gamesData]);
 
     useEffect(() => {
         if (isLoggedIn && user && user.token) {
@@ -329,10 +331,7 @@ const Home = () => {
                                 <h2 className="text-2xl font-bold text-gray-800 dark:text-white">Scoreboard</h2>
                                 <div className="flex space-x-4">
                                     <button
-                                        onClick={() => {
-                                            setShow1v1Only(false);
-                                            fetchInitialData();
-                                        }}
+                                        onClick={() => setShow1v1Only(false)}
                                         className={`px-4 py-2 rounded transition-all ${
                                             !show1v1Only 
                                             ? 'bg-blue-500 text-white' 
@@ -342,10 +341,7 @@ const Home = () => {
                                         Tous les scores
                                     </button>
                                     <button
-                                        onClick={() => {
-                                            setShow1v1Only(true);
-                                            fetchInitialData();
-                                        }}
+                                        onClick={() => setShow1v1Only(true)}
                                         className={`px-4 py-2 rounded transition-all ${
                                             show1v1Only 
                                             ? 'bg-blue-500 text-white' 
