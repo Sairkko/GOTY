@@ -176,7 +176,7 @@ const Game = () => {
                         <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z"></path>
                     </svg>
                 </div>
-                <p className="text-xl font-semibold text-gray-700 dark:text-white-300">
+                <p className="text-xl font-semibold text-gray-700 dark:text-white">
                     {countdown !== null
                         ? `La partie commence dans ${countdown}...`
                         : "En attente d'un autre joueur..."}
@@ -195,10 +195,10 @@ const Game = () => {
                             <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
                             <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z"></path>
                         </svg>
-                        <span className="ml-2 text-lg font-semibold text-gray-700 dark:text-white-300">Lancement de la pièce...</span>
+                        <span className="ml-2 text-lg font-semibold text-gray-700 dark:text-white">Lancement de la pièce...</span>
                     </div>
                 ) : coinTossResult ? (
-                    <p className="text-xl font-semibold text-gray-700 dark:text-white-300">
+                    <p className="text-xl font-semibold text-gray-700 dark:text-white">
                         Résultat du lancer : {coinTossResult === "pile" ? "Pile" : "Face"}
                     </p>
                 ) : null}
