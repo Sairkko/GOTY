@@ -46,12 +46,11 @@ const Navbar = () => {
     return (
         <nav className="p-4 bg-white dark:bg-gray-700 shadow-md transition-colors duration-300">
             <div className="container mx-auto flex justify-between items-center">
-                <div className="flex items-center space-x-4">
-                    <img src={logo} alt="Logo" className="w-24 h-20" />
-                    <Link to="/" className="text-xl font-bold text-gray-900 dark:text-white">
-                        Jeu
-                    </Link>
-                </div>
+                <img src={logo} alt="Logo" className="w-24 h-20" />
+
+                <Link to="/" className="absolute left-1/2 transform -translate-x-1/2 text-xl font-bold text-gray-900 dark:text-white hover:text-blue-600 dark:hover:text-blue-400 transition-colors">
+                    Jeu
+                </Link>
 
                 <div className="flex items-center space-x-4">
                     <button
