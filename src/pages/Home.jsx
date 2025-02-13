@@ -268,53 +268,73 @@ const Home = () => {
             {showScoresModal && (
                 <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50">
                     <div className="bg-white dark:bg-gray-800 p-8 rounded-lg shadow-xl max-w-4xl w-full max-h-[90vh] overflow-y-auto">
-                        <div className="flex justify-between items-center mb-6">
-                            <h2 className="text-2xl font-bold text-gray-800 dark:text-white">Scoreboard</h2>
-                            <div className="flex items-center space-x-4">
-                                <label className="flex items-center space-x-2 text-gray-700 dark:text-gray-300">
-                                    <input
-                                        type="checkbox"
-                                        checked={show1v1Only}
-                                        onChange={(e) => {
-                                            setShow1v1Only(e.target.checked);
+                        <div className="flex flex-col space-y-6">
+                            <div className="flex justify-between items-center">
+                                <h2 className="text-2xl font-bold text-gray-800 dark:text-white">Scoreboard</h2>
+                                <div className="flex space-x-4">
+                                    <button
+                                        onClick={() => {
+                                            setShow1v1Only(false);
                                             fetchScoreboard();
                                         }}
-                                        className="form-checkbox h-5 w-5 text-blue-600"
-                                    />
-                                    <span>Parties 1v1 uniquement</span>
-                                </label>
+                                        className={`px-4 py-2 rounded transition-all ${
+                                            !show1v1Only 
+                                            ? 'bg-blue-500 text-white' 
+                                            : 'bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300'
+                                        }`}
+                                    >
+                                        Tous les scores
+                                    </button>
+                                    <button
+                                        onClick={() => {
+                                            setShow1v1Only(true);
+                                            fetchScoreboard();
+                                        }}
+                                        className={`px-4 py-2 rounded transition-all ${
+                                            show1v1Only 
+                                            ? 'bg-blue-500 text-white' 
+                                            : 'bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300'
+                                        }`}
+                                    >
+                                        Scores 1v1
+                                    </button>
+                                </div>
                             </div>
-                        </div>
-                        {scoreboard.length > 0 ? (
-                            <table className="min-w-full divide-y divide-gray-200">
-                                <thead>
-                                <tr>
-                                    <th className="px-4 py-2 text-left text-sm font-bold text-gray-700">Nom</th>
-                                    <th className="px-4 py-2 text-left text-sm font-bold text-gray-700">Parties jouées</th>
-                                    <th className="px-4 py-2 text-left text-sm font-bold text-gray-700">Parties gagnées</th>
-                                    <th className="px-4 py-2 text-left text-sm font-bold text-gray-700">Pourcentage de victoire</th>
-                                </tr>
-                                </thead>
-                                <tbody className="bg-white dark:bg-gray-800 divide-y divide-gray-200">
-                                {scoreboard.map((userScore) => (
-                                    <tr key={userScore.username}>
-                                        <td className="px-4 py-2 text-sm text-gray-600 dark:text-gray-300">{userScore.username}</td>
-                                        <td className="px-4 py-2 text-sm text-gray-600 dark:text-gray-300">{userScore.played}</td>
-                                        <td className="px-4 py-2 text-sm text-gray-600 dark:text-gray-300">{userScore.won}</td>
-                                        <td className="px-4 py-2 text-sm text-gray-600 dark:text-gray-300">{userScore.winRate}%</td>
+
+                            {scoreboard.length > 0 ? (
+                                <table className="min-w-full divide-y divide-gray-200">
+                                    <thead>
+                                    <tr>
+                                        <th className="px-4 py-2 text-left text-sm font-bold text-gray-700 dark:text-gray-300">Nom</th>
+                                        <th className="px-4 py-2 text-left text-sm font-bold text-gray-700 dark:text-gray-300">Parties jouées</th>
+                                        <th className="px-4 py-2 text-left text-sm font-bold text-gray-700 dark:text-gray-300">Parties gagnées</th>
+                                        <th className="px-4 py-2 text-left text-sm font-bold text-gray-700 dark:text-gray-300">Pourcentage de victoire</th>
                                     </tr>
-                                ))}
-                                </tbody>
-                            </table>
-                        ) : (
-                            <p className="text-gray-700 dark:text-gray-300">Aucun score disponible.</p>
-                        )}
-                        <button
-                            className="mt-4 px-6 py-3 bg-blue-500 text-white rounded hover:bg-blue-600 transition"
-                            onClick={() => setShowScoresModal(false)}
-                        >
-                            Fermer
-                        </button>
+                                    </thead>
+                                    <tbody className="bg-white dark:bg-gray-800 divide-y divide-gray-200">
+                                    {scoreboard.map((userScore) => (
+                                        <tr key={userScore.username}>
+                                            <td className="px-4 py-2 text-sm text-gray-600 dark:text-gray-300">{userScore.username}</td>
+                                            <td className="px-4 py-2 text-sm text-gray-600 dark:text-gray-300">{userScore.played}</td>
+                                            <td className="px-4 py-2 text-sm text-gray-600 dark:text-gray-300">{userScore.won}</td>
+                                            <td className="px-4 py-2 text-sm text-gray-600 dark:text-gray-300">{userScore.winRate}%</td>
+                                        </tr>
+                                    ))}
+                                    </tbody>
+                                </table>
+                            ) : (
+                                <p className="text-gray-700 dark:text-gray-300">
+                                    {show1v1Only ? "Aucune partie 1v1 trouvée." : "Aucun score disponible."}
+                                </p>
+                            )}
+                            
+                            <button
+                                className="mt-4 px-6 py-3 bg-red-500 text-white rounded hover:bg-red-600 transition"
+                                onClick={() => setShowScoresModal(false)}
+                            >
+                                Fermer
+                            </button>
+                        </div>
                     </div>
                 </div>
             )}
