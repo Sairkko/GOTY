@@ -118,7 +118,15 @@ const Profile = () => {
                 ) : userHistory && (
                     <>
                         {/* Statistiques */}
-                        <div className="grid grid-cols-3 gap-4 mb-8">
+                        <div className="grid grid-cols-4 gap-4 mb-8">
+                            <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-lg">
+                                <div className="text-3xl font-bold text-blue-600 dark:text-blue-400">
+                                    {userHistory.stats.won + userHistory.stats.lost + userHistory.stats.playing}
+                                </div>
+                                <div className="text-sm text-gray-600 dark:text-gray-400">
+                                    Total parties
+                                </div>
+                            </div>
                             <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-lg">
                                 <div className="text-3xl font-bold text-green-600 dark:text-green-400">
                                     {userHistory.stats.won}
