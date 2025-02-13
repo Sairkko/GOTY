@@ -106,9 +106,6 @@ const Profile = () => {
                                 <p className="text-gray-600 dark:text-gray-400">
                                     <span className="font-semibold">Email:</span> {currentUserData.email}
                                 </p>
-                                <p className="text-gray-600 dark:text-gray-400">
-                                    <span className="font-semibold">ID:</span> {currentUserData.id}
-                                </p>
                             </div>
                         </div>
                     </div>
@@ -197,14 +194,10 @@ const Profile = () => {
                                                         </span>
                                                     </td>
                                                     <td className="px-6 py-4 text-sm text-center font-medium">
-                                                        {game.state === 'finished' ? (
-                                                            game.winner === user.user.id ? (
-                                                                <span className="text-green-600 dark:text-green-400">Victoire</span>
-                                                            ) : (
-                                                                <span className="text-red-600 dark:text-red-400">Défaite</span>
-                                                            )
+                                                        {game.state === 'finished' && game.winner === user.user.id ? (
+                                                            <span className="text-green-600 dark:text-green-400">Victoire</span>
                                                         ) : (
-                                                            <span className="text-gray-500 dark:text-gray-400">-</span>
+                                                            <span className="text-red-600 dark:text-red-400">Défaite</span>
                                                         )}
                                                     </td>
                                                 </tr>
