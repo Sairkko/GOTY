@@ -16,8 +16,53 @@ const Home = () => {
     const [isLoading, setIsLoading] = useState(false);
     const [usersData, setUsersData] = useState([]);
     const [gamesData, setGamesData] = useState([]);
+    const [showUserHistory, setShowUserHistory] = useState(false);
+    const [userHistory, setUserHistory] = useState([]);
     const navigate = useNavigate();
     const socket = io('https://jdr-lotr-back.onrender.com');
+
+    // Fonction pour obtenir les initiales de l'utilisateur
+    const getUserInitials = () => {
+        if (!user || !user.user) return '';
+        const username = user.user.username || '';
+        return username.split(' ')
+            .map(word => word[0])
+            .join('')
+            .toUpperCase()
+            .slice(0, 2);
+    };
+
+    // Fonction pour récupérer l'historique des parties de l'utilisateur
+    const fetchUserHistory = async () => {
+        setIsLoading(true);
+        try {
+            const response = await axios.get('https://jdr-lotr-back.onrender.com/games', {
+                headers: { 'Authorization': `Bearer ${user.token}` }
+            });
+            
+            if (response.status === 200) {
+                // Filtrer les parties où l'utilisateur est impliqué
+                const userGames = response.data.filter(game => 
+                    game.creator === user.user.id || game.player === user.user.id
+                );
+                
+                // Calculer les statistiques
+                const stats = {
+                    total: userGames.length,
+                    won: userGames.filter(game => game.winner === user.user.id).length,
+                    pending: userGames.filter(game => game.state === 'pending').length,
+                    playing: userGames.filter(game => game.state === 'playing').length
+                };
+                
+                setUserHistory({ games: userGames, stats });
+            }
+        } catch (error) {
+            toast.error("Erreur lors de la récupération de l'historique.");
+            console.error("Erreur:", error);
+        } finally {
+            setIsLoading(false);
+        }
+    };
 
     // Fonction pour récupérer les parties
     const fetchUserGames = async () => {
@@ -136,6 +181,12 @@ const Home = () => {
             socket.disconnect();
         };
     }, [isLoggedIn, user]);
+
+    useEffect(() => {
+        if (showUserHistory && isLoggedIn) {
+            fetchUserHistory();
+        }
+    }, [showUserHistory]);
 
     const createGame = async () => {
         if (!isLoggedIn) {
@@ -359,52 +410,66 @@ const Home = () => {
                                 </div>
                             ) : (
                                 scoreboard.length > 0 ? (
-                                    <div className="overflow-x-auto">
-                                        <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700 shadow-sm rounded-lg overflow-hidden">
-                                            <thead className="bg-gray-50 dark:bg-gray-700">
+                                    <div className="overflow-x-auto rounded-lg border border-gray-200 dark:border-gray-700 shadow-sm">
+                                        <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
+                                            <thead className="bg-gradient-to-r from-blue-500 to-blue-600 dark:from-blue-700 dark:to-blue-800">
                                             <tr>
                                                 {show1v1Only ? (
                                                     <>
-                                                        <th className="px-3 sm:px-4 py-3 text-left text-xs sm:text-sm font-bold text-gray-700 dark:text-gray-300 uppercase tracking-wider">Joueur 1</th>
-                                                        <th className="px-3 sm:px-4 py-3 text-center text-xs sm:text-sm font-bold text-gray-700 dark:text-gray-300 uppercase tracking-wider">Score</th>
-                                                        <th className="px-3 sm:px-4 py-3 text-left text-xs sm:text-sm font-bold text-gray-700 dark:text-gray-300 uppercase tracking-wider">Joueur 2</th>
-                                                        <th className="px-3 sm:px-4 py-3 text-left text-xs sm:text-sm font-bold text-gray-700 dark:text-gray-300 uppercase tracking-wider">Gagnant</th>
+                                                        <th className="px-6 py-4 text-left text-sm font-semibold text-white uppercase tracking-wider">Joueur 1</th>
+                                                        <th className="px-6 py-4 text-center text-sm font-semibold text-white uppercase tracking-wider">Score</th>
+                                                        <th className="px-6 py-4 text-left text-sm font-semibold text-white uppercase tracking-wider">Joueur 2</th>
+                                                        <th className="px-6 py-4 text-left text-sm font-semibold text-white uppercase tracking-wider">Gagnant</th>
                                                     </>
                                                 ) : (
                                                     <>
-                                                        <th className="px-3 sm:px-4 py-3 text-left text-xs sm:text-sm font-bold text-gray-700 dark:text-gray-300 uppercase tracking-wider">Nom</th>
-                                                        <th className="px-3 sm:px-4 py-3 text-left text-xs sm:text-sm font-bold text-gray-700 dark:text-gray-300 uppercase tracking-wider">Parties jouées</th>
-                                                        <th className="px-3 sm:px-4 py-3 text-left text-xs sm:text-sm font-bold text-gray-700 dark:text-gray-300 uppercase tracking-wider">Parties gagnées</th>
-                                                        <th className="px-3 sm:px-4 py-3 text-left text-xs sm:text-sm font-bold text-gray-700 dark:text-gray-300 uppercase tracking-wider">% Victoire</th>
+                                                        <th className="px-6 py-4 text-left text-sm font-semibold text-white uppercase tracking-wider">Nom</th>
+                                                        <th className="px-6 py-4 text-center text-sm font-semibold text-white uppercase tracking-wider">Parties jouées</th>
+                                                        <th className="px-6 py-4 text-center text-sm font-semibold text-white uppercase tracking-wider">Parties gagnées</th>
+                                                        <th className="px-6 py-4 text-center text-sm font-semibold text-white uppercase tracking-wider">% Victoire</th>
                                                     </>
                                                 )}
                                             </tr>
                                             </thead>
                                             <tbody className="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
                                             {show1v1Only ? (
-                                                scoreboard.map((match) => (
-                                                    <tr key={match.id} className="hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
-                                                        <td className={`px-3 sm:px-4 py-3 text-xs sm:text-sm ${match.creatorWon ? 'font-bold text-green-600 dark:text-green-400' : 'text-gray-600 dark:text-gray-300'}`}>
+                                                scoreboard.map((match, index) => (
+                                                    <tr key={match.id} className={`${index % 2 === 0 ? 'bg-white dark:bg-gray-800' : 'bg-gray-50 dark:bg-gray-700'} hover:bg-blue-50 dark:hover:bg-blue-900/20 transition-colors duration-200`}>
+                                                        <td className={`px-6 py-4 text-sm ${match.creatorWon ? 'font-semibold text-green-600 dark:text-green-400' : 'text-gray-700 dark:text-gray-300'}`}>
                                                             {match.creator}
                                                         </td>
-                                                        <td className="px-3 sm:px-4 py-3 text-xs sm:text-sm text-center font-bold text-gray-600 dark:text-gray-300">
+                                                        <td className="px-6 py-4 text-sm text-center font-mono font-bold text-blue-600 dark:text-blue-400">
                                                             {match.score}
                                                         </td>
-                                                        <td className={`px-3 sm:px-4 py-3 text-xs sm:text-sm ${!match.creatorWon ? 'font-bold text-green-600 dark:text-green-400' : 'text-gray-600 dark:text-gray-300'}`}>
+                                                        <td className={`px-6 py-4 text-sm ${!match.creatorWon ? 'font-semibold text-green-600 dark:text-green-400' : 'text-gray-700 dark:text-gray-300'}`}>
                                                             {match.opponent}
                                                         </td>
-                                                        <td className="px-3 sm:px-4 py-3 text-xs sm:text-sm text-gray-600 dark:text-gray-300">
+                                                        <td className="px-6 py-4 text-sm font-medium text-blue-600 dark:text-blue-400">
                                                             {match.winner}
                                                         </td>
                                                     </tr>
                                                 ))
                                             ) : (
-                                                scoreboard.map((userScore) => (
-                                                    <tr key={userScore.username} className="hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
-                                                        <td className="px-3 sm:px-4 py-3 text-xs sm:text-sm font-medium text-gray-600 dark:text-gray-300">{userScore.username}</td>
-                                                        <td className="px-3 sm:px-4 py-3 text-xs sm:text-sm text-gray-600 dark:text-gray-300">{userScore.played}</td>
-                                                        <td className="px-3 sm:px-4 py-3 text-xs sm:text-sm text-gray-600 dark:text-gray-300">{userScore.won}</td>
-                                                        <td className="px-3 sm:px-4 py-3 text-xs sm:text-sm text-gray-600 dark:text-gray-300">{userScore.winRate}%</td>
+                                                scoreboard.map((userScore, index) => (
+                                                    <tr key={userScore.username} className={`${index % 2 === 0 ? 'bg-white dark:bg-gray-800' : 'bg-gray-50 dark:bg-gray-700'} hover:bg-blue-50 dark:hover:bg-blue-900/20 transition-colors duration-200`}>
+                                                        <td className="px-6 py-4 text-sm font-medium text-gray-700 dark:text-gray-300">
+                                                            {userScore.username}
+                                                        </td>
+                                                        <td className="px-6 py-4 text-sm text-center font-mono text-gray-700 dark:text-gray-300">
+                                                            {userScore.played}
+                                                        </td>
+                                                        <td className="px-6 py-4 text-sm text-center font-mono text-gray-700 dark:text-gray-300">
+                                                            {userScore.won}
+                                                        </td>
+                                                        <td className="px-6 py-4 text-sm text-center">
+                                                            <span className={`inline-flex items-center px-3 py-1 rounded-full text-sm font-medium ${
+                                                                userScore.winRate >= 70 ? 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300' :
+                                                                userScore.winRate >= 40 ? 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-300' :
+                                                                'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-300'
+                                                            }`}>
+                                                                {userScore.winRate}%
+                                                            </span>
+                                                        </td>
                                                     </tr>
                                                 ))
                                             )}
@@ -412,12 +477,128 @@ const Home = () => {
                                         </table>
                                     </div>
                                 ) : (
-                                    <p className="text-gray-700 dark:text-gray-300 text-center py-8">
+                                    <p className="text-center py-8 text-gray-500 dark:text-gray-400 bg-gray-50 dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700">
                                         {show1v1Only ? "Aucune partie 1v1 trouvée." : "Aucun score disponible."}
                                     </p>
                                 )
                             )}
                         </div>
+                    </div>
+                </div>
+            )}
+
+            {/* Modal pour l'historique personnel */}
+            {showUserHistory && (
+                <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50 p-4">
+                    <div className="bg-white dark:bg-gray-800 p-4 sm:p-8 rounded-lg shadow-xl w-full max-w-4xl max-h-[90vh] overflow-y-auto relative">
+                        <div className="flex justify-between items-center mb-6">
+                            <h2 className="text-2xl font-bold text-gray-800 dark:text-white">
+                                Mon Historique de Parties
+                            </h2>
+                            <button
+                                onClick={() => setShowUserHistory(false)}
+                                className="px-3 py-1 bg-red-500 text-white rounded hover:bg-red-600 transition"
+                            >
+                                Fermer
+                            </button>
+                        </div>
+
+                        {isLoading ? (
+                            <div className="flex justify-center items-center py-8">
+                                <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500"></div>
+                            </div>
+                        ) : (
+                            <div className="space-y-6">
+                                {/* Statistiques */}
+                                {userHistory.stats && (
+                                    <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-6">
+                                        <div className="bg-blue-50 dark:bg-blue-900/20 p-4 rounded-lg">
+                                            <div className="text-2xl font-bold text-blue-600 dark:text-blue-400">
+                                                {userHistory.stats.total}
+                                            </div>
+                                            <div className="text-sm text-gray-600 dark:text-gray-400">
+                                                Parties totales
+                                            </div>
+                                        </div>
+                                        <div className="bg-green-50 dark:bg-green-900/20 p-4 rounded-lg">
+                                            <div className="text-2xl font-bold text-green-600 dark:text-green-400">
+                                                {userHistory.stats.won}
+                                            </div>
+                                            <div className="text-sm text-gray-600 dark:text-gray-400">
+                                                Victoires
+                                            </div>
+                                        </div>
+                                        <div className="bg-yellow-50 dark:bg-yellow-900/20 p-4 rounded-lg">
+                                            <div className="text-2xl font-bold text-yellow-600 dark:text-yellow-400">
+                                                {userHistory.stats.pending}
+                                            </div>
+                                            <div className="text-sm text-gray-600 dark:text-gray-400">
+                                                En attente
+                                            </div>
+                                        </div>
+                                        <div className="bg-purple-50 dark:bg-purple-900/20 p-4 rounded-lg">
+                                            <div className="text-2xl font-bold text-purple-600 dark:text-purple-400">
+                                                {userHistory.stats.playing}
+                                            </div>
+                                            <div className="text-sm text-gray-600 dark:text-gray-400">
+                                                En cours
+                                            </div>
+                                        </div>
+                                    </div>
+                                )}
+
+                                {/* Tableau des parties */}
+                                <div className="overflow-x-auto rounded-lg border border-gray-200 dark:border-gray-700 shadow-sm">
+                                    <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
+                                        <thead className="bg-gradient-to-r from-blue-500 to-blue-600 dark:from-blue-700 dark:to-blue-800">
+                                            <tr>
+                                                <th className="px-6 py-4 text-left text-sm font-semibold text-white uppercase tracking-wider">Date</th>
+                                                <th className="px-6 py-4 text-left text-sm font-semibold text-white uppercase tracking-wider">Adversaire</th>
+                                                <th className="px-6 py-4 text-center text-sm font-semibold text-white uppercase tracking-wider">Statut</th>
+                                                <th className="px-6 py-4 text-center text-sm font-semibold text-white uppercase tracking-wider">Résultat</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody className="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
+                                            {userHistory.games && userHistory.games.map((game, index) => (
+                                                <tr key={game.id} className={`${
+                                                    index % 2 === 0 ? 'bg-white dark:bg-gray-800' : 'bg-gray-50 dark:bg-gray-700'
+                                                } hover:bg-blue-50 dark:hover:bg-blue-900/20 transition-colors duration-200`}>
+                                                    <td className="px-6 py-4 text-sm text-gray-700 dark:text-gray-300">
+                                                        {new Date(game.createdAt).toLocaleDateString()}
+                                                    </td>
+                                                    <td className="px-6 py-4 text-sm text-gray-700 dark:text-gray-300">
+                                                        {game.player ? (
+                                                            game.creator === user.user.id ? game.player : game.creator
+                                                        ) : 'En attente'}
+                                                    </td>
+                                                    <td className="px-6 py-4 text-sm text-center">
+                                                        <span className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-medium ${
+                                                            game.state === 'finished' ? 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-300' :
+                                                            game.state === 'playing' ? 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-300' :
+                                                            'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-300'
+                                                        }`}>
+                                                            {game.state === 'finished' ? 'Terminée' :
+                                                             game.state === 'playing' ? 'En cours' : 'En attente'}
+                                                        </span>
+                                                    </td>
+                                                    <td className="px-6 py-4 text-sm text-center font-medium">
+                                                        {game.state === 'finished' ? (
+                                                            game.winner === user.user.id ? (
+                                                                <span className="text-green-600 dark:text-green-400">Victoire</span>
+                                                            ) : (
+                                                                <span className="text-red-600 dark:text-red-400">Défaite</span>
+                                                            )
+                                                        ) : (
+                                                            <span className="text-gray-500 dark:text-gray-400">-</span>
+                                                        )}
+                                                    </td>
+                                                </tr>
+                                            ))}
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        )}
                     </div>
                 </div>
             )}

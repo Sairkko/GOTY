@@ -7,6 +7,7 @@ import { DarkModeProvider } from './contexts/DarkModeContext';
 import { UserProvider } from './contexts/UserContext.jsx';
 import EmailConfirmation from "./pages/EmailConfirmation.jsx";
 import Game from "./pages/Game.jsx";
+import Profile from "./pages/Profile.jsx";
 import AuthLayout from './components/AuthLayout.jsx';
 import MainLayout from './components/MainLayout.jsx';
 import App from "./App.jsx";
@@ -22,6 +23,10 @@ const router = createBrowserRouter([
             {
                 path: '/game/:gameId',
                 element: <Game />,
+            },
+            {
+                path: '/profile',
+                element: <Profile />,
             },
             {
                 path: '/email-confirmation',

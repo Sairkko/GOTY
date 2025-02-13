@@ -9,7 +9,18 @@ import {UserContext} from "../contexts/UserContext.jsx";
 const Navbar = () => {
     const navigate = useNavigate();
     const { darkMode, toggleDarkMode } = useContext(DarkModeContext);
-    const { isLoggedIn, logout } = useContext(UserContext);
+    const { isLoggedIn, logout, user } = useContext(UserContext);
+
+    // Fonction pour obtenir les initiales de l'utilisateur
+    const getUserInitials = () => {
+        if (!user || !user.user) return '';
+        const username = user.user.username || '';
+        return username.split(' ')
+            .map(word => word[0])
+            .join('')
+            .toUpperCase()
+            .slice(0, 2);
+    };
 
     const handleLogout = async () => {
         const token = localStorage.getItem("token");
@@ -35,13 +46,14 @@ const Navbar = () => {
     return (
         <nav className="p-4 bg-white dark:bg-gray-700 shadow-md transition-colors duration-300">
             <div className="container mx-auto flex justify-between items-center">
-                <img src={logo} alt="Logo" className="w-24 h-20" />
+                <div className="flex items-center space-x-4">
+                    <img src={logo} alt="Logo" className="w-24 h-20" />
+                    <Link to="/" className="text-xl font-bold text-gray-900 dark:text-white">
+                        Jeu
+                    </Link>
+                </div>
 
-                <Link to="/" className="text-xl font-bold text-gray-900 dark:text-white">
-                    Jeu
-                </Link>
-
-                <div className="flex items-center">
+                <div className="flex items-center space-x-4">
                     <button
                         onClick={toggleDarkMode}
                         className="px-4 py-2 rounded-lg flex items-center transition-colors duration-300 bg-gray-200 dark:bg-gray-800 text-gray-800 dark:text-white hover:bg-gray-300 dark:hover:bg-gray-700"
@@ -49,33 +61,41 @@ const Navbar = () => {
                         {darkMode ? (
                             <SunIcon className="w-5 h-5 text-yellow-400" />
                         ) : (
-                            <MoonIcon className="w-5 h-5 text-white" />
+                            <MoonIcon className="w-5 h-5 text-gray-600" />
                         )}
                     </button>
 
                     {isLoggedIn ? (
-                        <button
-                            onClick={handleLogout}
-                            className="ml-4 text-gray-900 dark:text-white transition-colors duration-300 hover:text-gray-700 dark:hover:text-gray-300"
-                        >
-                            Déconnexion
-                        </button>
+                        <div className="flex items-center space-x-4">
+                            <button
+                                onClick={() => navigate('/profile')}
+                                className="flex items-center justify-center w-10 h-10 rounded-full bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white font-semibold transition-all shadow-lg hover:shadow-xl"
+                                title="Voir mon profil"
+                            >
+                                {getUserInitials()}
+                            </button>
+                            <button
+                                onClick={handleLogout}
+                                className="px-4 py-2 rounded bg-red-500 hover:bg-red-600 text-white transition-colors duration-300"
+                            >
+                                Déconnexion
+                            </button>
+                        </div>
                     ) : (
-                        <>
+                        <div className="flex items-center space-x-4">
                             <Link
                                 to="/auth/login"
-                                className="ml-4 text-gray-900 dark:text-white transition-colors duration-300 hover:text-gray-700 dark:hover:text-gray-300"
+                                className="px-4 py-2 rounded bg-blue-500 hover:bg-blue-600 text-white transition-colors duration-300"
                             >
                                 Connexion
                             </Link>
-
                             <Link
                                 to="/auth/register"
-                                className="ml-4 text-gray-900 dark:text-white transition-colors duration-300 hover:text-gray-700 dark:hover:text-gray-300"
+                                className="px-4 py-2 rounded bg-green-500 hover:bg-green-600 text-white transition-colors duration-300"
                             >
                                 Inscription
                             </Link>
-                        </>
+                        </div>
                     )}
                 </div>
             </div>
